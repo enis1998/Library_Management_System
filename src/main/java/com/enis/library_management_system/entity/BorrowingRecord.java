@@ -9,7 +9,7 @@ import java.util.UUID;
 @Table(name = "borrowing_records")
 public class BorrowingRecord {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(optional = false)

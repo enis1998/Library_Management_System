@@ -3,32 +3,26 @@ package com.enis.library_management_system.dto.BorrowingRecord;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class BorrowingRecordResponseDto {
-    private UUID id;
-
+public class ReturnResponse {
+    private UUID borrowingRecordId;
     private UUID bookId;
-
     private String bookTitle;
-
-    private UUID userId;
-
-    private String userName;
-
     private LocalDate borrowDate;
-
     private LocalDate dueDate;
-
     private LocalDate returnDate;
+    private boolean isOverdue;
+    private int overdueDay;
 
-    public BorrowingRecordResponseDto() {
+
+    public ReturnResponse() {
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getBorrowingRecordId() {
+        return borrowingRecordId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setBorrowingRecordId(UUID borrowingRecordId) {
+        this.borrowingRecordId = borrowingRecordId;
     }
 
     public UUID getBookId() {
@@ -45,22 +39,6 @@ public class BorrowingRecordResponseDto {
 
     public void setBookTitle(String bookTitle) {
         this.bookTitle = bookTitle;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public LocalDate getBorrowDate() {
@@ -85,5 +63,21 @@ public class BorrowingRecordResponseDto {
 
     public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
+    }
+
+    public boolean isOverdue() {
+        return isOverdue;
+    }
+
+    public void setOverdue(boolean overdue) {
+        isOverdue = overdue;
+    }
+
+    public int getOverdueDay() {
+        return overdueDay;
+    }
+
+    public void setOverdueDay(int overdueDay) {
+        this.overdueDay = overdueDay;
     }
 }
