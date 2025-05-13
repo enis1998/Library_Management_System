@@ -1,45 +1,69 @@
 package com.enis.library_management_system.controller.Auth;
 
+import com.enis.library_management_system.controller.Auth.contract.AuthContract;
 import com.enis.library_management_system.dto.User.UserRequestDto;
+import com.enis.library_management_system.dto.User.UserResponseDto;
+import com.enis.library_management_system.enums.Role;
 import com.enis.library_management_system.security.CustomUserDetailsService;
 import com.enis.library_management_system.security.JwtUtil;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
+    private final AuthContract authContract;
     private final JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(AuthContract authContract, JwtUtil jwtUtil) {
+        this.authContract = authContract;
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserRequestDto loginRequest) {
+    @PostMapping("/register/patron")
+    public ResponseEntity<?> registerPatron(@Valid @RequestBody UserRequestDto registerRequest) {
+        try {
+            registerRequest.setRole(Role.PATRON);
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+            UserResponseDto registeredUser = authContract.registerUser(registerRequest);
 
-        // 7 gün = 7 * 24 saat * 60 dakika * 60 saniye * 1000 milisaniye
-        long expirationInMs = TimeUnit.DAYS.toMillis(7);
+            long expirationInMs = TimeUnit.DAYS.toMillis(7);
+            String jwt = jwtUtil.generateToken(registerRequest.getEmail(), expirationInMs);
 
-        String jwt = jwtUtil.generateToken(loginRequest.getEmail(), expirationInMs);
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", registeredUser);
+            response.put("token", jwt);
 
-        return ResponseEntity.ok(new AuthResponse(jwt));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    public record AuthResponse(String token) { }
+    @PostMapping("/register/librarian")
+    public ResponseEntity<?> registerLibrarian(@Valid @RequestBody UserRequestDto registerRequest) {
+        try {
+            registerRequest.setRole(Role.LIBRARIAN);
+
+            UserResponseDto registeredUser = authContract.registerUser(registerRequest);
+
+            long expirationInMs = TimeUnit.DAYS.toMillis(7);
+            String jwt = jwtUtil.generateToken(registerRequest.getEmail(), expirationInMs);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", registeredUser);
+            response.put("token", jwt);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
