@@ -4,6 +4,7 @@ import com.enis.library_management_system.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class UserRequestDto {
     @NotBlank(message = "Name is mandatory")
@@ -14,6 +15,7 @@ public class UserRequestDto {
     private String email;
 
     @NotBlank(message = "Password is mandatory")
+    @Size(min = 6, max = 20)
     private String password;
 
     private String contactDetails;

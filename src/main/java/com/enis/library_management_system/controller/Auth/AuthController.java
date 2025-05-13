@@ -1,4 +1,4 @@
-package com.enis.library_management_system.controller;
+package com.enis.library_management_system.controller.Auth;
 
 import com.enis.library_management_system.dto.User.UserRequestDto;
 import com.enis.library_management_system.security.CustomUserDetailsService;

@@ -1,7 +1,7 @@
 package com.enis.library_management_system.security;
 
 import com.enis.library_management_system.entity.JwtKey;
-import com.enis.library_management_system.repository.JwtKeyRepository;
+import com.enis.library_management_system.service.Jwt.JwtKeyService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -9,49 +9,44 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class JwtUtil {
 
-    private final JwtKeyRepository jwtKeyRepository;
+    private final JwtKeyService jwtKeyService;
 
-    public JwtUtil(JwtKeyRepository jwtKeyRepository) {
-        this.jwtKeyRepository = jwtKeyRepository;
-    }
-
-    private Optional<JwtKey> getValidJwtKey() {
-        return jwtKeyRepository.findFirstByExpiresAtAfterOrderByCreatedAtDesc(java.time.LocalDateTime.now());
+    public JwtUtil(JwtKeyService jwtKeyService) {
+        this.jwtKeyService = jwtKeyService;
     }
 
     private Key getSigningKey() {
-        String secret = getValidJwtKey()
-                .orElseThrow(() -> new RuntimeException("Geçerli bir JWT Key bulunamadı!"))
-                .getSecretKey();
+        JwtKey jwtKey = jwtKeyService.getActiveKey();
+        String secret = jwtKey.getSecretKey();
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(String username, long expirationMs) {
         Key key = getSigningKey();
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String getUsernameFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.getSubject();
+        return parseClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
             return true;
-        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
