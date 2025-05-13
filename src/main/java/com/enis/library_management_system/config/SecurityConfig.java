@@ -32,19 +32,17 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1) Auth endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
 
-                        // 2) Swagger/OpenAPI için
                         .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api-docs",
-                                "/api-docs/**",
-                                "/webjars/**",
-                                "/swagger-resources/**"
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/api-docs",
+                        "/api-docs/**",
+                        "/webjars/**",
+                        "/swagger-resources/**"
                         ).permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
 
                         // 3) User management
                         .requestMatchers(HttpMethod.GET,  "/api/users").hasRole("LIBRARIAN")
